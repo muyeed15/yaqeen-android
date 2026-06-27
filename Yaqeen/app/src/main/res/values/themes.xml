@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Yaqeen" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">@color/yaqeen_green</item>
+        <item name="android:colorPrimaryDark">@color/yaqeen_green_dark</item>
+        <item name="android:colorAccent">@color/yaqeen_lime</item>
+        <item name="android:statusBarColor">@color/yaqeen_green_dark</item>
+        <item name="android:navigationBarColor">@color/white</item>
+    </style>
+</resources>
