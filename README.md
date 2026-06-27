@@ -39,12 +39,7 @@ To return to the input screen, clear the app's storage from Android Settings or 
 ## Setup
 
 ```bash
-# Clone the repo
-git clone https://github.com/pyxlab/yaqeen-android.git
-
-# Open in Android Studio, sync Gradle, then run on emulator or device (min SDK 24)
-
-# Or build from CLI
+# Build from CLI
 cd Yaqeen && ./gradlew assembleDebug
 ```
 
