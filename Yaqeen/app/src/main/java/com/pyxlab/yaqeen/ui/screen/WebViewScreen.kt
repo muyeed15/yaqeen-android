@@ -16,12 +16,20 @@ import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,13 +39,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import com.pyxlab.yaqeen.ui.theme.YaqeenGreenDark
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewScreen(url: String) {
+fun WebViewScreen(url: String, onExitRequested: () -> Unit = {}) {
     var webView by remember { mutableStateOf<WebView?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    var canGoBack by remember { mutableStateOf(false) }
 
     var fileChooserCallback by remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
 
@@ -126,11 +134,33 @@ fun WebViewScreen(url: String) {
         }
     }
 
-    BackHandler(enabled = canGoBack) {
-        webView?.goBack()
+    BackHandler {
+        if (webView?.canGoBack() == true) {
+            webView?.goBack()
+        } else {
+            onExitRequested()
+        }
     }
 
-    Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
+    val isDark = isSystemInDarkTheme()
+    val barColor = if (isDark) YaqeenGreenDark else MaterialTheme.colorScheme.background
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsTopHeight(WindowInsets.statusBars)
+                .background(barColor)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsBottomHeight(WindowInsets.navigationBars)
+                .background(barColor)
+                .align(Alignment.BottomCenter)
+        )
+
+        Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars)) {
         AndroidView(
             factory = { context ->
                 WebView(context).apply {
@@ -140,9 +170,8 @@ fun WebViewScreen(url: String) {
                     )
                     configureSettings()
                     webViewClient = createWebViewClient(
-                        onLoadingChange = { loading, backEnabled ->
+                        onLoadingChange = { loading, _ ->
                             isLoading = loading
-                            canGoBack = backEnabled
                         }
                     )
                     webChromeClient = chromeClient
@@ -158,6 +187,7 @@ fun WebViewScreen(url: String) {
                 modifier = Modifier.align(Alignment.Center)
             )
         }
+    }
     }
 }
 
@@ -198,6 +228,11 @@ private fun createWebViewClient(
 
         override fun onPageFinished(view: WebView, url: String) {
             super.onPageFinished(view, url)
+            onLoadingChange(false, view.canGoBack())
+        }
+
+        override fun doUpdateVisitedHistory(view: WebView, url: String, isReload: Boolean) {
+            super.doUpdateVisitedHistory(view, url, isReload)
             onLoadingChange(false, view.canGoBack())
         }
     }

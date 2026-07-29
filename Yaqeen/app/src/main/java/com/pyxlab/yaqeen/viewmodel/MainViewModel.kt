@@ -22,6 +22,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         AppConfig.saveUrl(getApplication(), url)
     }
 
+    fun clearUrl() {
+        urlState.value = null
+    }
+
     private fun normalizeUrl(input: String): String {
         val trimmed = input.trim()
         return if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
